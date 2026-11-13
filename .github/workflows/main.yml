@@ -43,7 +43,7 @@ jobs:
       fail-fast: false
 
     env:
-      DEVICE_TARGET: "iphone:clang:16.5:14.0"
+      DEVICE_TARGET: "iphone:clang:16.5:12.0"
 
     steps:
       - name: checkout
@@ -68,11 +68,10 @@ jobs:
       - name: download sdks
         if: steps.cache-sdks.outputs.cache-hit != 'true'
         run: |
-          curl -LO https://github.com/theos/sdks/archive/master.zip
-          unzip -q master.zip
+          git clone --depth 1 https://github.com/theos/sdks.git sdks-master
           mkdir -p theos/sdks
-          mv sdks-master/*.sdk theos/sdks/
-          rm -rf master.zip sdks-master
+          cp -R sdks-master/*.sdk theos/sdks/
+          rm -rf sdks-master
 
       - name: set THEOS env var
         run: echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
@@ -126,10 +125,10 @@ jobs:
           name: "Nightly"
           body: |
             This build was automatically generated from the latest commit on `main`.
-            
+
             **Commit SHA:** ${{ github.sha }}
             **Triggered by:** @${{ github.actor }}
-            
+
             > [!NOTE]
             > A nightly build is basically the next update partially done. Additionally, this build might have the old version number but the code itself should has the latest commit.
           prerelease: true
